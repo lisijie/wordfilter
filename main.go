@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./trie"
 	"bufio"
 	"encoding/json"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"trie"
 )
 
 const (
@@ -49,6 +49,7 @@ func importWords(T *trie.Trie, file string) (err error) {
 func mainHandler(w http.ResponseWriter, r *http.Request) {
 	content := r.FormValue("content")
 	result, find := T.Replace(content)
+	ret := T.Find(content)
 
 	m := make(map[string]interface{})
 	m["result"] = result
@@ -57,6 +58,18 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		m["ret"] = 1
 	} else {
 		m["ret"] = 0
+	}
+	if ret == true {
+		m["find"] = 1
+		del := T.Delete(content)
+		if del == true {
+			m["del"] = 1
+		} else {
+			m["del"] = 0
+		}
+	} else {
+		m["find"] = 0
+		m["del"] = 0
 	}
 
 	bytes, err := json.Marshal(m)
