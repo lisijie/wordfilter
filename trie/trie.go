@@ -56,6 +56,7 @@ func (this *Trie) Replace(txt string) (string, []string) {
 	slen := len(chars)
 	node := this.Root
 	for i := 0; i < slen; i++ {
+		v := 0
 		if _, exists := node.Children[chars[i]]; exists {
 			node = node.Children[chars[i]]
 			for j := i + 1; j < slen; j++ {
@@ -63,15 +64,17 @@ func (this *Trie) Replace(txt string) (string, []string) {
 					break
 				}
 				node = node.Children[chars[j]]
-				if node.End == true {
-					for t := i; t <= j; t++ {
-						result[t] = '*'
-					}
-					find = append(find, string(chars[i:j+1]))
-					i = j
-					node = this.Root
-					break
+				if node.End == true { //找到匹配关键字
+					v = j
 				}
+			}
+
+			if v > 0 { //最大匹配
+				for t := i; t <= v; t++ {
+					result[t] = '*'
+				}
+				find = append(find, string(chars[i:v+1]))
+				i = v
 			}
 			node = this.Root
 		}
