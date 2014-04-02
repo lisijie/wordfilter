@@ -122,8 +122,9 @@ func (this *TrieNode) delete(txt string) bool {
 	}
 
 	child, ok := this.Children[s[0]]
-	//txt[1:]这种方式访问中文字符串时会出错。
-	if ok && child.delete(txt[1:]) {
+	//txt[1:]这种方式访问中文字符串时会出错。child.delete(txt[1:]),
+	//参考：http://blog.csdn.net/wowzai/article/details/8941865
+	if ok && child.delete(string(s[1:])) {
 		//节点是否为树叶，则删除该节点
 		if child.End == true {
 			delete(this.Children, s[0])
