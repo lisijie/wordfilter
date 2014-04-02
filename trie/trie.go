@@ -102,24 +102,17 @@ func (this *Trie) Find(txt string) bool {
 //首先查找该字符串，边查询边将经过的节点压栈，若找不到，则返回假；否则依次判断栈顶节点是否为树叶，
 //若是则删除该节点，否则返回真。
 func (this *Trie) Delete(txt string) bool {
-	log.Printf("正在查找: %s ...\n", txt)
 	s := []rune(txt)
 	slen := len(s)
 	if slen == 0 {
 		return true
 	}
-
 	node := this.Root
-	child, ok := node.Children[s[0]]
-	if ok && child.delete(txt[1:]) {
-		//delete(node.Children, s[0])
-		this.Root.Children[s[0]].Children = nil
-		this.Root.Children[s[0]].End = false
-	}
-	return false
+
+	return node.delete(txt)
 }
 
-//删除字符串
+//删除字符串，为中文时将会出错。
 func (this *TrieNode) delete(txt string) bool {
 	log.Printf("正在查找: %s ...\n", txt)
 	s := []rune(txt)
@@ -129,17 +122,19 @@ func (this *TrieNode) delete(txt string) bool {
 	}
 
 	child, ok := this.Children[s[0]]
-	if ok {
-		if slen > 1 {
-			if !child.delete(txt[1:]) {
-				return false
+	//txt[1:]这种方式访问中文字符串时会出错。
+	if ok && child.delete(txt[1:]) {
+		//节点是否为树叶，则删除该节点
+		if child.End == true {
+			delete(this.Children, s[0])
+			log.Printf("this.Children: %n ...\n", len(this.Children))
+			if len(this.Children) == 0 {
+				this.End = true
 			}
 		}
 
-		//delete(this.Children, s[0])
-		this.Children[s[0]].Children = nil
-		this.Children[s[0]].End = false
 		return true
 	}
+
 	return false
 }

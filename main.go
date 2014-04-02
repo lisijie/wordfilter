@@ -60,7 +60,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		m["ret"] = 0
 	}
 	if ret == true {
-		m["find"] = 1
+		m["search"] = 1
 		del := T.Delete(content)
 		if del == true {
 			m["del"] = 1
@@ -68,7 +68,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			m["del"] = 0
 		}
 	} else {
-		m["find"] = 0
+		m["search"] = 0
 		m["del"] = 0
 	}
 
