@@ -49,14 +49,14 @@ func (this *Trie) Add(txt string) {
 }
 
 //屏蔽字搜索替换
-func (this *Trie) Replace(txt string) (string, []string) {
+func (this *Trie) Replace1(txt string) (string, []string) {
 	chars := []rune(txt)
 	result := []rune(txt)
 	find := make([]string, 0, 10)
 	slen := len(chars)
 	node := this.Root
 	for i := 0; i < slen; i++ {
-		v := 0
+		end := 0
 		if _, exists := node.Children[chars[i]]; exists {
 			node = node.Children[chars[i]]
 			for j := i + 1; j < slen; j++ {
@@ -65,17 +65,56 @@ func (this *Trie) Replace(txt string) (string, []string) {
 				}
 				node = node.Children[chars[j]]
 				if node.End == true { //找到匹配关键字
-					v = j
+					end = j
 				}
 			}
 
-			if v > 0 { //最大匹配
-				for t := i; t <= v; t++ {
+			if end > 0 { //最大匹配
+				for t := i; t <= end; t++ {
 					result[t] = '*'
 				}
-				find = append(find, string(chars[i:v+1]))
-				i = v
+				find = append(find, string(chars[i:end+1]))
+				i = end
 			}
+			node = this.Root
+		}
+	}
+
+	return string(result), find
+}
+
+//屏蔽字搜索替换
+func (this *Trie) Replace(txt string) (string, []string) {
+	chars := []rune(txt)
+	result := []rune(txt)
+	find := make([]string, 0, 10)
+	slen := len(chars)
+	node := this.Root
+
+	start := 0 //关键字匹配的开始位置
+	end := 0   //关键字匹配的结束位置
+	for i := 0; i < slen; i++ {
+		//找到第一个匹配，记录匹配的开始位置。
+		if _, exists := node.Children[chars[i]]; exists {
+			if start == 0 {
+				start = i
+			}
+			node = node.Children[chars[i]]
+			if node.End == true { //找到匹配关键字的结束位置。最大化匹配，所以此处继续向下寻找匹配
+				end = i
+			}
+		} else {
+			if end > start { //最大匹配，此处似乎有个问题，就是关键字为一个字符时(end == start)，没法匹配出来。
+				for t := start; t <= end; t++ {
+					result[t] = '*'
+				}
+				find = append(find, string(chars[start:end+1]))
+				i = end
+			}
+
+			//重置匹配位置。
+			end = 0
+			start = 0
 			node = this.Root
 		}
 	}
@@ -89,6 +128,7 @@ func (this *Trie) Find(txt string) bool {
 	slen := len(chars)
 	node := this.Root
 	for i := 0; i < slen; i++ {
+		log.Printf("正在查找: %n ...\n", i)
 		if _, exists := node.Children[chars[i]]; exists {
 			node = node.Children[chars[i]]
 			//若全部字符都存在匹配，判断最终停留的节点是否为树叶，若是，则返回真，否则返回假。
