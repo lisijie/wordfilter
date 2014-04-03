@@ -1,10 +1,6 @@
 //字典包，采用的是单词查找树
 package trie
 
-import (
-	"log"
-)
-
 type Trie struct {
 	Root *TrieNode
 }
@@ -109,6 +105,7 @@ func (this *Trie) Replace(txt string) (string, []string) {
 					result[t] = '*'
 				}
 				find = append(find, string(chars[start:end+1]))
+				//此处非常关键，好好思考为何需要这个。才能明白整个搜索替换的过程。
 				i = end
 			}
 
@@ -128,7 +125,6 @@ func (this *Trie) Find(txt string) bool {
 	slen := len(chars)
 	node := this.Root
 	for i := 0; i < slen; i++ {
-		log.Printf("正在查找: %n ...\n", i)
 		if _, exists := node.Children[chars[i]]; exists {
 			node = node.Children[chars[i]]
 			//若全部字符都存在匹配，判断最终停留的节点是否为树叶，若是，则返回真，否则返回假。
@@ -157,7 +153,6 @@ func (this *Trie) Delete(txt string) bool {
 
 //删除字符串，为中文时将会出错。
 func (this *TrieNode) delete(txt string) bool {
-	log.Printf("正在查找: %s ...\n", txt)
 	s := []rune(txt)
 	slen := len(s)
 	if slen == 0 {
@@ -171,7 +166,6 @@ func (this *TrieNode) delete(txt string) bool {
 		//节点是否为树叶，则删除该节点
 		if child.End == true {
 			delete(this.Children, s[0])
-			log.Printf("this.Children: %n ...\n", len(this.Children))
 			if len(this.Children) == 0 {
 				this.End = true
 			}
